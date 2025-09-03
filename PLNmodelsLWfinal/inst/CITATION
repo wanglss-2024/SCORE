@@ -1,0 +1,39 @@
+citHeader("To cite PLNmodels (either PLNPCA or PLNnetwork) in publications, please use:")
+
+bibentry(
+  bibtype = "article",
+  key = "PLNmodels",
+  author = c("Julien Chiquet", "Mahendra Mariadassou", "Stéphane Robin"),
+  title = "The Poisson-lognormal model as a versatile framework for the joint analysis of species abundances",
+  journal = "Frontiers in Ecology and Evolution",
+  year = "2021",
+  doi = "10.3389/fevo.2021.588292",
+  url = "https://www.frontiersin.org/articles/10.3389/fevo.2021.588292",
+  textVersion = "J. Chiquet, M. Mariadassou and S. Robin: The Poisson-lognormal model as a versatile framework for the joint analysis of species abundances, Frontiers in Ecology and Evolution, 2021."
+)
+
+bibentry(
+  bibtype = "inproceedings",
+  key = "PLNnetwork",
+  author = c("Julien Chiquet", "Mahendra Mariadassou", "Stéphane Robin"),
+  title = "Variational inference for sparse network reconstruction from count data",
+  booktitle = "Proceedings of the 36th International Conference on Machine Learning",
+  year = "2019",
+  volume = "97",
+  series = "Proceedings of Machine Learning Research",
+  url = "http://proceedings.mlr.press/v97/chiquet19a.html",
+  textVersion = "J. Chiquet, M. Mariadassou and S. Robin:  Variational inference for sparse network reconstruction from count data, Proceedings of the 36th International Conference on Machine Learning (ICML), 2019."
+)
+
+bibentry(
+  bibtype = "article",
+  key = "PLNPCA",
+  author = c("Julien Chiquet", "Mahendra Mariadassou", "Stéphane Robin"),
+  title = "Variational inference for probabilistic Poisson PCA",
+  journal = "The Annals of Applied Statistics",
+  year = "2018",
+  volume = "12", pages = "2674--2698",
+  url = "https://projecteuclid.org/journals/annals-of-applied-statistics/volume-12/issue-4/Variational-inference-for-probabilistic-Poisson-PCA/10.1214/18-AOAS1177.full",
+  textVersion = "J. Chiquet, M. Mariadassou and S. Robin: Variational inference for probabilistic Poisson PCA, the Annals of Applied Statistics, 2018."
+)
+
