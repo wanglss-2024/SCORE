@@ -8,6 +8,8 @@ This folder contains R code for
 
 (2) Example code to train the model on simulated dataset (*simulations*).
 
+(3) Example code to run real-world application on synthetic data (*application*).
+
 ## Preprint
 Wang, L.\*, Li, M.\*, Xia, Z., Liu, M., & Cai, T. (2025). Semi-supervised Clustering Through Representation Learning of Large-scale EHR Data. arXiv preprint arXiv:2505.20731. [link](https://arxiv.org/pdf/2505.20731)
 
