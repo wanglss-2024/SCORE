@@ -8,7 +8,26 @@ library(fmsb)
 library(glmnet)
 source("utility.R")
 
+# Manually selected features
+feat.sel = c("C0043143", # wheelchair
+             "C0025353", # mental health
+             "RXNORM:897018", # dalfampridine
+             "C3714552", # weakness
+             "PheCode:315.2") #speech and language disorder
+
+# Load data
 load("data/Fake_MS_pt_all.Rdata")
+V = eigen(cov(t(embed.features[colnames(dat.L.train$Abundance),])))$vectors; dim(V)
+r = length(feat.sel)
+V.sel = matrix(0, nrow=p, ncol=r)
+for (j in 1:r){
+  feat = feat.sel[j]
+  i = which(colnames(dat.L.train$Abundance) == feat)
+  V.sel[i,j] = 1
+}
+V.new = cbind(V.sel, V)
+
+# Run models
 n.list = c(50, 100, 150, 200)
 AUC.all.list = PRAUC.all.list = n.all.list = n.visits.all.list = type.all.list = NULL
 b = 1234
@@ -91,20 +110,17 @@ for (n in n.list) {
   PRAUC.xgb = COMP_PRAUC(ROC.xgb$TPR, ROC.xgb$PPV); print(PRAUC.xgb)
   
   ## supervised SCORE
-  V = eigen(cov(t(embed.features[colnames(dat.L.train$Abundance),])))$vectors; dim(V)
-  lb = list(B = matrix(-Inf, nrow=3, ncol=q),
-            L = matrix(0, nrow=q, ncol=q),
-            M = matrix(-Inf, nrow=n, ncol=q),
-            S = matrix(0, nrow=n, ncol=q))
+  lb = list(B = matrix(-Inf, nrow=3, ncol=r+q),
+            L = matrix(0, nrow=r+q, ncol=r+q),
+            M = matrix(-Inf, nrow=n, ncol=r+q),
+            S = matrix(0, nrow=n, ncol=r+q))
   
   pln.fixedv.sup = PLNfixedVsup(Abundance ~ Intercept + log(count+1), grouping = PDDS, data  = dat.L.train,
-                                control=PLN_param(V=V[,1:q],
-                                                  #V = eigen(cov(log(dat.U$Abundance+1)))$vectors[,1:q],
-                                                  rank=q,
+                                control=PLN_param(V=V.new[,1:(r+q)],
+                                                  rank=r+q,
                                                   config_optim = list("algorithm" = "MMA",
                                                                       "lower_bounds" = lb,
-                                                                      "L0" = sqrt(diag(1, q))
-                                                                      #"L0" = sqrt(diag(eigen(pln.lr.sup$model_par$Sigma)$values[1:q]))
+                                                                      "L0" = sqrt(diag(1, r+q))
                                                   )))
   fixedv.sup.pred = predict(pln.fixedv.sup, dat.L.test, type="posterior")[,2]
   ROC.fixedv.sup = ROC(dat.L.test$PDDS, fixedv.sup.pred)
@@ -112,18 +128,18 @@ for (n in n.list) {
   PRAUC.fixedv.sup = COMP_PRAUC(ROC.fixedv.sup$TPR, ROC.fixedv.sup$PPV); print(PRAUC.fixedv.sup)
   
   ## Semisupervised fixed V
-  lb = list(B = matrix(-Inf, nrow=3, ncol=q),
-            L = matrix(0, nrow=q, ncol=q),
-            M = matrix(-Inf, nrow=n+N, ncol=q),
-            S = matrix(0, nrow=n+N, ncol=q))
+  lb = list(B = matrix(-Inf, nrow=3, ncol=r+q),
+            L = matrix(0, nrow=r+q, ncol=r+q),
+            M = matrix(-Inf, nrow=n+N, ncol=r+q),
+            S = matrix(0, nrow=n+N, ncol=r+q))
   tau.L.train = cbind(1-dat.L.train$PDDS, dat.L.train$PDDS)
   tau.init = rbind(tau.L.train, predict(pln.fixedv.sup, dat.U, type="posterior"))
   rownames(tau.init) = NULL
   w = c(rep(0.5, n), rep(0.5, N))
-  L.init = sqrt(diag(eigen(pln.fixedv.sup$model_par$Sigma)$values[1:q]))
+  L.init = sqrt(diag(eigen(pln.fixedv.sup$model_par$Sigma)$values[1:(r+q)]))
   B.init = pln.fixedv.sup$model_par$B
-  pln.fixedv.semisup = PLNfixedVsemisup(Abundance ~ Intercept + log(count+1), grouping=PDDS, weights=w, data=dat.all.train, control=PLN_param(V=V[,1:q], #eigen(cov(log(dat.U$Abundance+1)))$vectors[,1:q],
-                                                                                                                                              rank=q,
+  pln.fixedv.semisup = PLNfixedVsemisup(Abundance ~ Intercept + log(count+1), grouping=PDDS, weights=w, data=dat.all.train, control=PLN_param(V=V.new[,1:(r+q)],
+                                                                                                                                              rank=r+q,
                                                                                                                                               config_optim = list("algorithm" = "MMA",
                                                                                                                                                                   "lower_bounds" = lb,
                                                                                                                                                                   "ftol_out" = 1e-6,
